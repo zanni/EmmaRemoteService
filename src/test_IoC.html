@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<title>Test IoC</title>
+		<script type="text/javascript" src="../lib/IoC/IoC.js"></script>
+		<script type="text/javascript">
+			var interface = function(){
+				this.self = function(){alert("self")};
+				this.execute = function(text){alert("interface "+text)}
+			};
+			
+			
+			var interfaceProvider = IoC.makeProvider(interface);
+			
+			
+			var interfaceA = function(){
+				var that = new interface();
+				that.execute = function(text){alert("A "+text);};
+				return that;
+			};
+			
+			var interfaceB = function(){
+				var that = new interface();
+				that.execute=function(text){alert("B "+text);};
+				return that;
+			};
+			
+			
+			interfaceProvider.addService("A", new interfaceA());
+			interfaceProvider.addService("B", new interfaceB());
+			
+			var serviceA = interfaceProvider.getService("A");
+			var serviceB = interfaceProvider.getService("B");
+			serviceA.execute("mouai");
+			serviceB.execute("c cool");
+			serviceA.self();
+
+		</script>
+	</head>
+	<body>
+	</body>
+</html>
