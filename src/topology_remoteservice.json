@@ -1,0 +1,84 @@
+{
+    "type": "node",
+    "payload": [
+                {
+    "Host": "EmmaRemoteServiceAccess",
+    "ressources": [
+        {
+            "name": "itunes",
+            "data": [
+                {
+                    "uri": "http://localhost:8182/itunes" 
+                },
+                {
+                    "data": {
+                        "name": "itunes",
+                        "unit": "boolean",
+                        "value": "1" 
+                    } 
+                },
+                {
+                    "meta": {
+                        "name": "itunes",
+                        "type": "service",
+                        "min": "0",
+                        "max": "1",
+                        "readonly": "1" 
+                    } 
+                } 
+            ] 
+        },
+        {
+            "name": "vlc",
+            "data": [
+                {
+                    "uri": "http://localhost:8182/vlc" 
+                },
+                {
+                    "data": {
+                        "name": "vlc",
+                        "unit": "boolean",
+                        "value": "1" 
+                    } 
+                },
+                {
+                    "meta": {
+                        "name": "vlc",
+                        "type": "service",
+                        "min": "0",
+                        "max": "1",
+                        "readonly": "1" 
+                    } 
+                } 
+            ] 
+        },
+        {
+            "name": "awaken",
+            "data": [
+                {
+                    "uri": "http://localhost:8182/awaken" 
+                },
+                {
+                    "data": {
+                        "name": "awaken",
+                        "unit": "boolean",
+                        "value": "1" 
+                    } 
+                },
+                {
+                    "meta": {
+                        "name": "awaken",
+                        "type": "service",
+                        "min": "0",
+                        "max": "1",
+                        "readonly": "1" 
+                    } 
+                } 
+            ] 
+        },
+       
+    ] 
+} 
+    ],
+    "date": "2010-11-30T18:56:38.624Z"
+}
