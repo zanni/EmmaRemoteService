@@ -81,8 +81,11 @@ var fileHandlerInterface = function(){
 						var temp = [];
 						temp.push(model.path+args);
 						service.execute(res, "/Applications/VLC.app",temp);
-						//res.write("mouai c cool");
-						//res.end();
+						
+					}
+					else{
+						res.write("server can't manage this kind od file");
+						res.end();
 					}
   	  			}
 				
@@ -98,8 +101,11 @@ var fileHandlerInterface = function(){
 					var temp = [];
 					temp.push(model.path+args);
 					service.execute(res, "/Applications/VLC.app",temp);
-					//res.write("mouai c cool");
-					//res.end();
+					
+				}
+				else{
+					res.write("server can't manage this kind od file");
+					res.end();
 				}
   			}
   			
