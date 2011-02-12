@@ -30,6 +30,9 @@ var handlerInterface = function(command){
 		args.unshift(file_path);
 		var command = spawn(that.command, args);
 		command.stdout.on('data', function (data) {
+			
+			data = data.asciiSlice(0,data.length);
+			data = data.replace(new RegExp("\n", "gi"), "::")
 	      	res.write(data);
 	      	res.end();
 	    });
@@ -46,6 +49,7 @@ EmmaRemoteService.handlerProvider = IoC.makeProvider(handlerInterface);
 //this handler will execute file with "scpt" extension as follow :
 //osascript {file_path} {args}
 EmmaRemoteService.handlerProvider.addService("scpt", new handlerInterface("osascript"));
+EmmaRemoteService.handlerProvider.addService("avi", new handlerInterface("open"));
 //EmmaRemoteService.handlerProvider.addService("json", new handlerInterface("ls"));
 
 var fileHandlerInterface = function(){
@@ -56,9 +60,50 @@ var fileHandlerInterface = function(){
 		fs.readFile(file_path ,'utf-8', function(err, data){
 			if (err) throw err;
   			var model = JSON.parse(data);
-  			var body = JSON.stringify(args)
-  			console.log(args);
-  			super.execute(res, model.path);
+  			
+  			//fu string format, replacing %20 with space
+  			args = args.replace(RegExp("%20", "gi"), " ");
+  			//console.log(model.path+args);
+  			try{
+  				//ugly patch
+  	  			var stat = fs.statSync(model.path+args);
+  	  			if(stat && stat.isFile && !stat.isFile()){
+  	  				console.log("search folder: "+model.path+args);
+  	  				super.execute(res, model.path+args);
+  	  			}
+  	  			else{
+  	  				var extension = args.split(".").pop();
+		  			console.log("lunch file: "+model.path+args);
+		  			console.log(model.path);
+		  			console.log(args);
+		  			if(EmmaRemoteService.handlerProvider.hasService(extension)){
+						var service = EmmaRemoteService.handlerProvider.getService(extension);
+						var temp = [];
+						temp.push(model.path+args);
+						service.execute(res, "/Applications/VLC.app",temp);
+						//res.write("mouai c cool");
+						//res.end();
+					}
+  	  			}
+				
+
+  			}
+  			catch(err){
+  				var extension = args.split(".").pop();
+	  			console.log("lunch file: "+model.path+args);
+	  			console.log(model.path);
+	  			console.log(args);
+	  			if(EmmaRemoteService.handlerProvider.hasService(extension)){
+					var service = EmmaRemoteService.handlerProvider.getService(extension);
+					var temp = [];
+					temp.push(model.path+args);
+					service.execute(res, "/Applications/VLC.app",temp);
+					//res.write("mouai c cool");
+					//res.end();
+				}
+  			}
+  			
+  			
 		});	
 	};
 	return that;
@@ -78,8 +123,8 @@ var error = function(name, message){
 
 var express = require('express');
 var app = express.createServer(
-    express.bodyDecoder()
-  );
+	 express.bodyDecoder()
+);
 /*
 app.get('/discover/*', function(req,res){
 	var host = req.params.host;
@@ -89,7 +134,6 @@ app.get('/discover/*', function(req,res){
 app.get('/discover/all', function(req,res){
 	var hosts = [];
 	var path = EmmaRemoteService.SERVICE_PATH;
-	console.log(path);
 	
 	var service = fs.readdirSync(path);
 	var exits = false;
@@ -98,7 +142,6 @@ app.get('/discover/all', function(req,res){
 		var host_component = new Emma.Host({
 			ip:"http://"+EmmaRemoteService.DOMAIN+":"+EmmaRemoteService.PORT+"/"+service[i]+"/",
 		});
-		console.log(path+service[i]);
 		var stat = fs.statSync(path+service[i]);
 		if(stat && stat.isFile && !stat.isFile()){
 			var resource = fs.readdirSync(path+service[i]);
@@ -151,7 +194,6 @@ app.get('/discover/:host/:resource', function(req,res){
 	console.log("[EmmaRemoteService] - GET - /discover/"+host+"/"+resource);
 	var hosts = [];
 	var path = EmmaRemoteService.SERVICE_PATH+host;
-	console.log(path);
 	try{
 		var files = fs.readdirSync(path);
 		var exits = false;
@@ -210,12 +252,41 @@ app.get('/:service/:action', function(req, res){
 				else{
 					res.writeHead(200,{'Content-Type': 'text/plain'});
 					var handler = EmmaRemoteService.handlerProvider.getService(extension);
-					if(req.body){
-						console.log("body");
-						console.log(req.body);
-						handler.execute(res,path+"/"+files[i]);
-					}
-					else handler.execute(res,path+"/"+files[i]);
+					console.log(JSON.stringify(req.body));
+					handler.execute(res,path+"/"+files[i]);
+				}
+			}
+		}
+		if(!exists)res.send(error("action",action+" is not an available action of service "+service));
+		
+	}
+	catch(err){
+		res.send(error("path","'"+service+"' is not an available service"));
+	}
+});
+
+app.put('/:service/:action', function(req, res){
+	
+	var service = req.params.service;
+	var action = req.params.action;
+	console.log("[EmmaRemoteService] - PUT - "+service+"/"+action);
+	var path = EmmaRemoteService.SERVICE_PATH+service;
+	try{
+		var files = fs.readdirSync(path);
+		var exits = false;
+		
+		for(var i in files){
+			var extension = files[i].split(".").pop();
+			var name = files[i].replace("."+extension, "");
+			if(name === action){
+				exists = true;
+				if(!EmmaRemoteService.handlerProvider.hasService(extension)){
+					res.send(error("action","action can not be handled"));
+				}
+				else{
+					res.writeHead(200,{'Content-Type': 'text/plain'});
+					var handler = EmmaRemoteService.handlerProvider.getService(extension);
+					handler.execute(res,path+"/"+files[i],req.body.path);
 				}
 			}
 		}
