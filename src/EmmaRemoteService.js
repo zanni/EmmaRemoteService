@@ -120,7 +120,7 @@ EmmaRemoteService.handlerProvider.addService("json", new fileHandlerInterface())
 
 
 //use Emma model to represent service/action as host/resource
-var model = require('./model/Emma_model');
+var model = require('./model/emma_model');
 var Emma = model.Emma;
 
 var error = function(name, message){
@@ -130,7 +130,7 @@ var error = function(name, message){
 var express = require('express');
 var app = express.createServer(
 	 express.bodyParser()
-);
+);g
 /*
 app.get('/discover/*', function(req,res){
 	var host = req.params.host;
