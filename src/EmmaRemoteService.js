@@ -129,7 +129,7 @@ var error = function(name, message){
 
 var express = require('express');
 var app = express.createServer(
-	 express.bodyDecoder()
+	 express.bodyParser()
 );
 /*
 app.get('/discover/*', function(req,res){
